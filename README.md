@@ -30,8 +30,9 @@
 2. [Tech Stack](#-tech-stack)
 3. [Features](#-features)
 4. [Quick Start](#-quick-start)
-5. [Screenshots](#-screenshots)
-6. [Deployment](#-deployment)
+5. [Troubleshooting](#-troubleshooting)
+6. [Screenshots](#-screenshots)
+7. [Deployment](#-deployment)
 
 ---
 
@@ -327,12 +328,131 @@ npm install
    ```
 3. Run the development server:
 
-   ```bash
-   npm run dev
-   ```
-4. Open [http://localhost:3000](http://localhost:3000) in your browser.
+    ```bash
+    npm run dev
+    ```
+  4. Open [http://localhost:3000](http://localhost:3000) in your browser.
 
 ---
+
+## 🚨 Troubleshooting
+
+### Authentication Error: "Please configure Clerk + Supabase integration"
+
+If you see this error, it means Row Level Security (RLS) is blocking access because Supabase cannot read the user ID from Clerk's JWT token.
+
+#### Quick Fix (Temporary - to verify issue)
+
+Go to Supabase Dashboard → SQL Editor and run:
+
+```sql
+ALTER TABLE public.boards DISABLE ROW LEVEL SECURITY;
+ALTER TABLE public.columns DISABLE ROW LEVEL SECURITY;
+ALTER TABLE public.tasks DISABLE ROW LEVEL SECURITY;
+```
+
+If the app works now, the issue is with RLS. Re-enable it and follow the proper fix below.
+
+#### Proper Fix: Configure RLS Policies
+
+1. **Update the requesting_user_id() function**:
+
+```sql
+CREATE OR REPLACE FUNCTION requesting_user_id()
+RETURNS text AS $$
+  SELECT NULLIF(
+    auth.jwt()->>'sub',
+    ''
+  )::text;
+$$ LANGUAGE SQL STABLE;
+```
+
+2. **Configure JWT Template in Clerk**:
+
+   - Go to [Clerk Dashboard](https://dashboard.clerk.com)
+   - Navigate to JWT Templates → New template
+   - Name: `supabase`
+   - Add these claims:
+
+```json
+{
+  "role": "authenticated",
+  "user_id": "https://www.clerk.com/v1/user/{{user.id}}",
+  "email": "{{user.primaryEmailAddress?.emailAddress}}"
+}
+```
+
+3. **Re-enable RLS**:
+
+```sql
+ALTER TABLE public.boards ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.columns ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.tasks ENABLE ROW LEVEL SECURITY;
+```
+
+#### For detailed troubleshooting guides:
+
+- See `QUICK_AUTH_FIX.md` for step-by-step instructions
+- See `TROUBLESHOOTING_AUTH.md` for comprehensive solutions
+- Use `troubleshoot.sh` to check your setup
+- Open `troubleshoot.html` in your browser for interactive debugging
+
+---
+
+## 🚀 Deployment to Vercel
+
+### Quick Deployment Guide
+
+1. **Push to GitHub**:
+   ```bash
+   git init
+   git add .
+   git commit -m "Ready for deployment"
+   git push origin main
+   ```
+
+2. **Deploy to Vercel**:
+   - Go to [vercel.com](https://vercel.com) and sign in
+   - Click "Add New Project"
+   - Import your repository
+   - Configure environment variables:
+     ```
+     NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=your_clerk_key
+     CLERK_SECRET_KEY=your_clerk_secret
+     NEXT_PUBLIC_SUPABASE_URL=your_supabase_url
+     NEXT_PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key
+     ```
+   - Click "Deploy"
+
+### Using Vercel CLI
+
+1. Install CLI:
+   ```bash
+   npm i -g vercel
+   ```
+
+2. Login and deploy:
+   ```bash
+   vercel login
+   vercel
+   ```
+
+### Environment Variables for Production
+
+Make sure these are set in Vercel:
+- `NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY`
+- `CLERK_SECRET_KEY`
+- `NEXT_PUBLIC_SUPABASE_URL`
+- `NEXT_PUBLIC_SUPABASE_ANON_KEY`
+
+## 🌟 All Features Free Forever
+
+This application is designed to be completely free for all users:
+- ✅ Unlimited boards
+- ✅ Unlimited tasks
+- ✅ No hidden fees
+- ✅ No premium tiers
+- ✅ All features included
 
 ## 🔗 Useful Links
 

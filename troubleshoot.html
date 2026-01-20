@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gehad Team - Troubleshooting</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-900 text-white min-h-screen p-8">
+    <div class="max-w-4xl mx-auto">
+        <h1 class="text-3xl font-bold mb-8 text-center">🔍 Gehad Team - فحص الإعدادات</h1>
+
+        <div class="space-y-6">
+            <!-- Environment Check -->
+            <div class="bg-gray-800 rounded-lg p-6">
+                <h2 class="text-xl font-semibold mb-4 flex items-center gap-2">
+                    <span>⚙️</span> فحص متغيرات البيئة
+                </h2>
+                
+                <div class="space-y-3">
+                    <div class="flex items-center justify-between bg-gray-700 p-3 rounded">
+                        <span>NEXT_PUBLIC_SUPABASE_URL</span>
+                        <span id="supabase-url" class="text-yellow-400">⏳ جاري الفحص...</span>
+                    </div>
+                    
+                    <div class="flex items-center justify-between bg-gray-700 p-3 rounded">
+                        <span>NEXT_PUBLIC_SUPABASE_ANON_KEY</span>
+                        <span id="supabase-key" class="text-yellow-400">⏳ جاري الفحص...</span>
+                    </div>
+                    
+                    <div class="flex items-center justify-between bg-gray-700 p-3 rounded">
+                        <span>NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY</span>
+                        <span id="clerk-key" class="text-yellow-400">⏳ جاري الفحص...</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Clerk Session Check -->
+            <div class="bg-gray-800 rounded-lg p-6">
+                <h2 class="text-xl font-semibold mb-4 flex items-center gap-2">
+                    <span>🔐</span> فحص جلسة Clerk
+                </h2>
+                
+                <div class="space-y-3">
+                    <div class="flex items-center justify-between bg-gray-700 p-3 rounded">
+                        <span>الحالة</span>
+                        <span id="clerk-session" class="text-yellow-400">⏳ جاري الفحص...</span>
+                    </div>
+                    
+                    <div class="flex items-center justify-between bg-gray-700 p-3 rounded">
+                        <span>معرف المستخدم</span>
+                        <span id="clerk-user-id" class="text-yellow-400">⏳ جاري الفحص...</span>
+                    </div>
+                </div>
+                
+                <button 
+                    onclick="testClerkToken()"
+                    class="mt-4 w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded"
+                >
+                    فحص JWT Token
+                </button>
+                
+                <div id="token-result" class="mt-4 hidden">
+                    <div class="bg-gray-700 p-3 rounded">
+                        <h3 class="font-semibold mb-2">نتيجة التوكن:</h3>
+                        <div id="token-details" class="text-sm"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Supabase Connection Check -->
+            <div class="bg-gray-800 rounded-lg p-6">
+                <h2 class="text-xl font-semibold mb-4 flex items-center gap-2">
+                    <span>🗄️</span> فحص اتصال Supabase
+                </h2>
+                
+                <div class="space-y-3">
+                    <div class="flex items-center justify-between bg-gray-700 p-3 rounded">
+                        <span>الحالة</span>
+                        <span id="supabase-status" class="text-yellow-400">⏳ جاري الفحص...</span>
+                    </div>
+                </div>
+                
+                <button 
+                    onclick="testSupabaseConnection()"
+                    class="mt-4 w-full bg-green-600 hover:bg-green-700 text-white font-semibold py-2 px-4 rounded"
+                >
+                    اختبار الاتصال
+                </button>
+                
+                <div id="supabase-result" class="mt-4 hidden">
+                    <div class="bg-gray-700 p-3 rounded">
+                        <h3 class="font-semibold mb-2">نتيجة الاختبار:</h3>
+                        <div id="supabase-details" class="text-sm"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- SQL Instructions -->
+            <div class="bg-gray-800 rounded-lg p-6">
+                <h2 class="text-xl font-semibold mb-4 flex items-center gap-2">
+                    <span>📝</span> تعليمات إصلاح المشكلة
+                </h2>
+                
+                <div class="space-y-4">
+                    <div class="bg-gray-700 p-4 rounded">
+                        <h3 class="font-semibold mb-2 text-blue-400">1. تحقق من JWT Template في Clerk</h3>
+                        <ol class="list-decimal list-inside space-y-1 text-sm">
+                            <li>اذهب إلى <a href="https://dashboard.clerk.com" target="_blank" class="text-blue-400 hover:underline">Clerk Dashboard</a></li>
+                            <li>اختر تطبيقك</li>
+                            <li>اذهب إلى <strong>JWT Templates</strong></li>
+                            <li>أنشئ قالب جديد باسم <code class="bg-gray-600 px-1 rounded">supabase</code></li>
+                            <li>أضف الـ Claims التالية:</li>
+                        </ol>
+                        <pre class="bg-gray-900 p-3 rounded mt-2 text-xs overflow-x-auto"><code>{
+  "role": "authenticated",
+  "user_id": "https://www.clerk.com/v1/user/{{user.id}}",
+  "email": "{{user.primaryEmailAddress?.emailAddress}}"
+}</code></pre>
+                    </div>
+                    
+                    <div class="bg-gray-700 p-4 rounded">
+                        <h3 class="font-semibold mb-2 text-green-400">2. تعطيل RLS مؤقتاً (للتجربة فقط)</h3>
+                        <p class="text-sm mb-2">في Supabase Dashboard → SQL Editor، شغل:</p>
+                        <pre class="bg-gray-900 p-3 rounded text-xs overflow-x-auto"><code>ALTER TABLE public.boards DISABLE ROW LEVEL SECURITY;
+ALTER TABLE public.columns DISABLE ROW LEVEL SECURITY;
+ALTER TABLE public.tasks DISABLE ROW LEVEL SECURITY;</code></pre>
+                        <p class="text-sm mt-2 text-yellow-400">⚠️ هذا للتجربة فقط! أعطل RLS في الإنتاج</p>
+                    </div>
+                    
+                    <div class="bg-gray-700 p-4 rounded">
+                        <h3 class="font-semibold mb-2 text-purple-400">3. إعادة تفعيل RLS</h3>
+                        <pre class="bg-gray-900 p-3 rounded text-xs overflow-x-auto"><code>ALTER TABLE public.boards ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.columns ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.tasks ENABLE ROW LEVEL SECURITY;</code></pre>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/@clerk/clerk-js@latest/dist/clerk.browser.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    
+    <script>
+        // Check environment variables
+        const supabaseUrl = 'NEXT_PUBLIC_SUPABASE_URL' in window ? '✅ موجود' : '❌ غير موجود';
+        document.getElementById('supabase-url').innerHTML = supabaseUrl;
+        document.getElementById('supabase-url').className = supabaseUrl.includes('✅') ? 'text-green-400' : 'text-red-400';
+
+        // Load Clerk
+        const clerkPubKey = 'pk_test_Y3VyaW91cy1tb2xsdXNrLTk2LmNsZXJrLmFjY291bnRzLmRldiQ';
+        
+        async function testClerkToken() {
+            try {
+                const clerk = window.Clerk;
+                const session = await clerk.session.getToken({ template: 'supabase' });
+                
+                const tokenResult = document.getElementById('token-result');
+                const tokenDetails = document.getElementById('token-details');
+                tokenResult.classList.remove('hidden');
+                
+                if (session) {
+                    document.getElementById('clerk-session').innerHTML = '✅ نشط';
+                    document.getElementById('clerk-session').className = 'text-green-400';
+                    
+                    document.getElementById('clerk-user-id').innerHTML = '✅ ' + clerk.user.id;
+                    document.getElementById('clerk-user-id').className = 'text-green-400';
+                    
+                    tokenDetails.innerHTML = `
+                        <div class="text-green-400 mb-2">✅ تم الحصول على التوكن</div>
+                        <div>الطول: ${session.length} حرف</div>
+                        <div>النموذج: supabase</div>
+                    `;
+                } else {
+                    document.getElementById('clerk-session').innerHTML = '❌ غير نشط';
+                    document.getElementById('clerk-session').className = 'text-red-400';
+                    
+                    document.getElementById('clerk-user-id').innerHTML = '❌ لا يوجد';
+                    document.getElementById('clerk-user-id').className = 'text-red-400';
+                    
+                    tokenDetails.innerHTML = `<div class="text-red-400">❌ لم يتم الحصول على التوكن. تأكد من تسجيل الدخول وتكوين JWT template في Clerk</div>`;
+                }
+            } catch (error) {
+                document.getElementById('clerk-session').innerHTML = '❌ خطأ';
+                document.getElementById('clerk-session').className = 'text-red-400';
+                
+                const tokenResult = document.getElementById('token-result');
+                const tokenDetails = document.getElementById('token-details');
+                tokenResult.classList.remove('hidden');
+                tokenDetails.innerHTML = `<div class="text-red-400">❌ خطأ: ${error.message}</div>`;
+            }
+        }
+
+        async function testSupabaseConnection() {
+            const supabaseUrl = 'https://qiuitsoolbbnlnnjhluf.supabase.co';
+            const supabaseKey = 'sb_publishable_sgjqn4gYMLUa1oblKowCVg_Vwi_Xpw4';
+            
+            try {
+                const supabase = window.supabase.createClient(supabaseUrl, supabaseKey);
+                
+                const { data, error } = await supabase.from('boards').select('count');
+                
+                const resultDiv = document.getElementById('supabase-result');
+                const detailsDiv = document.getElementById('supabase-details');
+                resultDiv.classList.remove('hidden');
+                
+                if (error) {
+                    document.getElementById('supabase-status').innerHTML = '❌ فشل الاتصال';
+                    document.getElementById('supabase-status').className = 'text-red-400';
+                    
+                    detailsDiv.innerHTML = `
+                        <div class="text-red-400 mb-2">❌ خطأ في الاتصال</div>
+                        <div>الكود: ${error.code}</div>
+                        <div>الرسالة: ${error.message}</div>
+                        <div class="mt-2 text-yellow-400">💡 هذا قد يعني أن RLS يمنع الوصول. جرب تعطيل RLS مؤقتاً</div>
+                    `;
+                } else {
+                    document.getElementById('supabase-status').innerHTML = '✅ متصل';
+                    document.getElementById('supabase-status').className = 'text-green-400';
+                    
+                    detailsDiv.innerHTML = `
+                        <div class="text-green-400 mb-2">✅ الاتصال ناجح!</div>
+                        <div>عدد اللوحات: ${data[0]?.count || 0}</div>
+                    `;
+                }
+            } catch (error) {
+                document.getElementById('supabase-status').innerHTML = '❌ خطأ';
+                document.getElementById('supabase-status').className = 'text-red-400';
+                
+                const resultDiv = document.getElementById('supabase-result');
+                const detailsDiv = document.getElementById('supabase-details');
+                resultDiv.classList.remove('hidden');
+                detailsDiv.innerHTML = `<div class="text-red-400">❌ خطأ: ${error.message}</div>`;
+            }
+        }
+
+        // Initialize on load
+        window.addEventListener('load', () => {
+            document.getElementById('clerk-key').innerHTML = '✅ موجود';
+            document.getElementById('clerk-key').className = 'text-green-400';
+            document.getElementById('supabase-key').innerHTML = '✅ موجود';
+            document.getElementById('supabase-key').className = 'text-green-400';
+        });
+    </script>
+</body>
+</html>

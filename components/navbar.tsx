@@ -39,7 +39,7 @@ export default function Navbar({
           <div className="flex items-center space-x-2">
             <Trello className="h-6 w-6 sm:h-8 sm:w-8 text-blue-600" />
             <span className="text-xl sm:text-2xl font-bold text-gray-900">
-              Trello Clone
+              Gehad Team
             </span>
           </div>
 
@@ -53,30 +53,30 @@ export default function Navbar({
 
   if (isBoardPage) {
     return (
-      <header className="bg-white border-b sticky top-0 z-50">
+      <header className="bg-slate-800/80 backdrop-blur-sm border-b border-slate-700 sticky top-0 z-50">
         <div className="container mx-auto px-4 py-3 sm:py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-2 sm:space-x-4 min-w-0">
               <Link
                 href="/dashboard"
-                className="flex items-center space-x-1 sm:space-x-2 text-gray-600 hover:text-gray-900 flex-shrink-0"
+                className="flex items-center space-x-1 sm:space-x-2 text-slate-300 hover:text-white flex-shrink-0"
               >
                 <ArrowLeft className="h-4 w-4 sm:h-5 sm:w-5" />
                 <span className="hidden sm:inline">Back to dashboard</span>
                 <span className="sm:hidden">Back</span>
               </Link>
-              <div className="h-4 sm:h-6 w-px bg-gray-300 hidden sm:block" />
+              <div className="h-4 sm:h-6 w-px bg-slate-600 hidden sm:block" />
               <div className="flex items-center space-x-1 sm:space-x-2 min-w-0">
-                <Trello className="text-blue-600" />
+                <Trello className="text-purple-400" />
                 <div className="items-center space-x-1 sm:space-x-2 min-w-0">
-                  <span className="text-lg font-bold text-gray-900 truncate">
+                  <span className="text-lg font-bold text-white truncate">
                     {boardTitle}
                   </span>
                   {onEditBoard && (
                     <Button
                       variant="ghost"
                       size="sm"
-                      className="h-7 w-7 flex-shrink-0 p-0"
+                      className="h-7 w-7 flex-shrink-0 p-0 text-slate-400 hover:text-white"
                       onClick={onEditBoard}
                     >
                       <MoreHorizontal />
@@ -91,8 +91,8 @@ export default function Navbar({
                 <Button
                   variant="outline"
                   size="sm"
-                  className={`text-xs sm:text-sm ${
-                    filterCount > 0 ? "bg-blue-100 border-blue-200" : ""
+                  className={`text-xs sm:text-sm border-slate-600 text-slate-300 hover:bg-slate-700 hover:text-white ${
+                    filterCount > 0 ? "bg-purple-600/20 border-purple-500/50" : ""
                   }`}
                   onClick={onFilterClick}
                 >
@@ -101,7 +101,7 @@ export default function Navbar({
                   {filterCount > 0 && (
                     <Badge
                       variant="secondary"
-                      className="text-xs ml-1 sm:ml-2 bg-blue-100 border-blue-200"
+                      className="text-xs ml-1 sm:ml-2 bg-purple-600/30 text-purple-300"
                     >
                       {filterCount}
                     </Badge>
@@ -121,7 +121,7 @@ export default function Navbar({
         <div className="flex items-center space-x-2">
           <Trello className="h-6 w-6 sm:h-8 sm:w-8 text-blue-600" />
           <span className="text-xl sm:text-2xl font-bold text-gray-900">
-            Trello Clone
+            Gehad Team
           </span>
         </div>
 
